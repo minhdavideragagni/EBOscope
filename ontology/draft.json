@@ -361,6 +361,24 @@
       "source": "oa:SpecificResource",
       "target": "oa:Selector",
       "property": "oa:hasSelector"
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "ebo:BiasPropagation",
+      "property": "dul:isMemberOf",
+      "note": "Membership runs from qualification to the propagation collection."
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "ebo:EpistemicBiasQualification",
+      "property": "sequence:directlyPrecedes",
+      "note": "Ordering alone does not establish causal transmission."
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "ebo:EpistemicBiasQualification",
+      "property": "sequence:directlyFollows",
+      "note": "Inverse precedence relation used within a documented propagation path."
     }
   ],
   "examples": [
