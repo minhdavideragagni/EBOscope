@@ -192,7 +192,12 @@ def search_sources(entity: str):
             searchable = "\n".join([title, raw, snippet])
             if not has_bias_language(searchable):
                 continue
-            text = raw if raw else snippet
+            body = raw if raw else snippet
+            text = "\n".join(part for part in [
+                f"TITLE: {title}",
+                body,
+                f"SEARCH SNIPPET: {snippet}" if snippet and snippet not in body else ""
+            ] if part).strip()
             if len(text) < 40:
                 continue
             seen.add(url)
