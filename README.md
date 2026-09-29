@@ -1,30 +1,65 @@
 # EBOscope
 
-**EBOscope** explores how claims that an identifiable artefact or process is epistemically biased are documented online, and reconstructs the reasoning behind those claims using an EBO-oriented semantic profile.
+**EBOscope** goes beyond a decontextualized claim such as **“X is biased.”**
 
-This repository hosts the public web prototype.
+A visitor enters a named artefact, process, map/projection, dataset/model, document, or public work. The application searches the web for readable sources, uses **Mistral** to reconstruct source-documented epistemic-bias assessments, and exposes the reasoning through an **EBO-oriented** structure.
 
-## Core idea
+> EBOscope is **not** a bias detector and does not output a global “biased / unbiased” verdict.
 
-EBOscope does **not** answer “is X biased?” with a global verdict. It searches for documented assessments and reconstructs, where the sources support it:
+## Public workflow
 
-- the assessed target;
-- the responsible assessor or attributed agent;
-- the assessment purpose/context;
-- the epistemic criterion;
-- relevant indicators and evidence;
-- the resulting epistemic-bias qualification;
-- optional bias category and perspective;
-- what remains undocumented or interpretive.
+1. **Search** — retrieve readable web sources about documented criticisms, limitations, uses and responses.
+2. **Reconstruct** — identify candidate target, assessor, purpose, criterion, indicator, evidence, grounds and qualification.
+3. **Inspect** — explore each candidate as a human-readable record and an interactive EBO graph.
+4. **Reuse** — export a provisional JSON-LD representation.
 
-The current EBO mapping is provisional until the authoritative OWL version is available.
+The web interface never asks visitors for API keys.
 
-## Deployment
+## Architecture
 
-The project is configured for Render via `render.yaml`. Server-side environment variables are required:
+- **Frontend:** plain HTML/CSS/JavaScript in `web/index.html`
+- **Backend:** FastAPI in `app.py`
+- **Search:** Tavily Search API
+- **LLM:** Mistral API, default model `mistral-small-latest`
+- **Ontology:** provisional EBO application profile; `ontology/adapter.json` is an explicit placeholder until the authoritative EBO OWL is available
+- **Hosting:** Render Blueprint via `render.yaml`
+
+## Deploy
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/minhdavideragagni/EBOscope)
+
+During deployment, configure these **server-side secrets**:
 
 - `MISTRAL_API_KEY`
 - `TAVILY_API_KEY`
 
-Visitors never enter API keys.
+Do **not** commit either key to GitHub.
 
+Mistral Studio currently supports Free mode with usage/rate limits. Tavily also provides a free developer allowance; provider quotas can change, so check the current provider dashboards before public testing.
+
+After deployment, visit:
+
+- `/` — public EBOscope interface
+- `/api/health` — confirms whether the two server-side providers are configured
+
+## Epistemic safeguards
+
+EBOscope deliberately distinguishes:
+
+- a technical phenomenon from an epistemic-bias qualification;
+- the webpage author from the assessor reported by the source;
+- a bias category from an epistemic criterion;
+- a finding about a particular version/use/subset from a global judgement about the searched entity;
+- source-explicit information from an EBO-oriented interpretive mapping.
+
+If a source does not support a field, the application should leave it absent rather than invent it.
+
+## EBO status
+
+The authoritative OWL version of EBO is **not yet connected**. The current prototype uses provisional role labels based on the documented conceptual model. This is declared in `ontology/adapter.json`.
+
+When the authoritative ontology is released, the adapter can be replaced and the exported graph validated against the real EBO IRIs and axioms.
+
+## Repository
+
+Research prototype for investigating explainable, source-grounded and machine-readable epistemic-bias qualifications.
