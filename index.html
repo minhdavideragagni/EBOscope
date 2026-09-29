@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EBOscope — Preview</title>
+<meta name="description" content="Static preview of EBOscope.">
+<style>
+:root{--ink:#0b0d0c;--paper:#fbfcf8;--lime:#BCE784;--mint:#5DD39E;--blue:#348AA7;--line:#dce1d9;--muted:#68706b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}a{color:inherit}.shell{max-width:1180px;margin:auto;padding:22px 28px 60px}
+.previewbar{background:var(--blue);color:white;padding:10px 16px;border-radius:14px;margin-bottom:18px;font-size:12px;font-weight:800;display:flex;justify-content:space-between;gap:16px;align-items:center}
+.previewbar span:last-child{font-weight:500;opacity:.95}
+nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ink);padding-bottom:16px}.brand{font-weight:900;letter-spacing:-.04em;font-size:21px}.brand span{background:var(--lime);padding:3px 7px;border-radius:8px}.navnote{font-size:12px;color:var(--muted)}
+.hero{padding:64px 0 40px;display:grid;grid-template-columns:1.2fr .8fr;gap:42px;align-items:end}.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}.hero h1{font-size:clamp(48px,7vw,94px);letter-spacing:-.07em;line-height:.89;margin:12px 0 24px;max-width:850px}.hero p{font-size:20px;line-height:1.45;max-width:680px;margin:0}.hero-side{font-size:14px;line-height:1.55;border-left:1px solid var(--ink);padding-left:24px}
+.searchbox{border:1.5px solid var(--ink);border-radius:24px;padding:18px;background:white;box-shadow:7px 7px 0 var(--ink)}.searchrow{display:flex;gap:10px}.searchrow input{flex:1;border:0;outline:0;font-size:21px;padding:16px;background:transparent;min-width:0}.go{border:0;background:#bbb;color:white;border-radius:16px;padding:0 24px;font-weight:800;cursor:not-allowed}.examples{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 11px;cursor:pointer}.chip:hover{border-color:var(--ink)}
+.notice{display:none;margin:22px 0 0;border:1px solid var(--ink);background:var(--lime);padding:15px 18px;border-radius:16px;font-size:13px}.notice.on{display:block}
+.about{margin-top:72px;border-top:1px solid var(--ink);padding-top:30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}.about h3{font-size:24px;letter-spacing:-.03em;margin:0 0 8px}.about p{font-size:14px;line-height:1.55;margin:0}.tag{display:inline-block;background:var(--blue);color:white;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.mock{margin-top:54px;border-top:1px solid var(--ink);padding-top:28px}.mockhead{display:flex;justify-content:space-between;align-items:end;gap:20px}.mockhead h2{font-size:36px;letter-spacing:-.045em;margin:0}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.step{border:1px solid var(--ink);border-radius:18px;padding:18px;background:white;min-height:138px}.step b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--blue);margin-bottom:10px}.step strong{font-size:21px;letter-spacing:-.03em}.step p{font-size:13px;line-height:1.45;color:var(--muted);margin:8px 0 0}
+footer{margin-top:55px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:20px}
+@media(max-width:760px){.shell{padding:18px}.previewbar{display:block}.previewbar span{display:block}.previewbar span+span{margin-top:4px}.hero{grid-template-columns:1fr;padding-top:40px}.hero-side{border-left:0;border-top:1px solid var(--ink);padding:16px 0 0}.searchrow{display:block}.go{width:100%;padding:15px;margin-top:8px}.about,.flow{grid-template-columns:1fr}.navnote{display:none}}
+</style>
+</head>
+<body><div class="shell">
+<div class="previewbar"><span>STATIC PREVIEW</span><span>The interface is online. Live web search + Mistral will activate after the backend is deployed.</span></div>
+<nav><div class="brand">EBO<span>scope</span></div><div class="navnote">Epistemic Bias Ontology explorer · preview</div></nav>
+<section class="hero">
+<div><div class="eyebrow">Go beyond “it is biased”</div><h1>See what is behind a bias claim.</h1>
+<p>Enter a named artefact, process, dataset, map, model, or public work. EBOscope is designed to search for documented assessments and make their <b>scope, criteria, evidence and qualifications</b> explicit.</p></div>
+<div class="hero-side"><b>No bias score. No global verdict.</b><br>EBOscope reconstructs what sources actually argue, then maps that reasoning to EBO. A missing result is never treated as evidence of “no bias”.</div>
+</section>
+<div class="searchbox">
+<div class="searchrow"><input id="entity" aria-label="Entity" placeholder="e.g. Mercator projection"><button class="go" id="go" type="button">Backend not connected</button></div>
+<div class="examples">Try the interface with: <button class="chip" data-v="Mercator projection">Mercator projection</button><button class="chip" data-v="ImageNet person subtree">ImageNet person subtree</button></div>
+<div class="notice" id="notice">This GitHub Pages version is only a visual preview. The live version needs the server-side backend so API keys remain private.</div>
+</div>
+<section class="mock">
+<div class="mockhead"><div><div class="eyebrow">One task</div><h2>From a bias label to an inspectable qualification.</h2></div></div>
+<div class="flow">
+<div class="step"><b>01 · Search</b><strong>Find sources.</strong><p>Look for documented criticisms, limitations and assessments around a named target.</p></div>
+<div class="step"><b>02 · Reconstruct</b><strong>Recover the reasoning.</strong><p>Separate target, assessor, purpose, criterion, indicator, evidence and grounds.</p></div>
+<div class="step"><b>03 · Qualify</b><strong>Keep the claim scoped.</strong><p>Represent a contextual epistemic-bias qualification instead of a global “biased / not biased” label.</p></div>
+<div class="step"><b>04 · Reuse</b><strong>Make it machine-readable.</strong><p>Let people and software inspect the same structured assessment history.</p></div>
+</div>
+</section>
+<section class="about">
+<div><span class="tag">Why EBO?</span><h3>Bias is more than a label.</h3><p>EBO separates the activity of assessing from the qualification that results from it, preserving who assessed what and under which epistemic criterion.</p></div>
+<div><span class="tag">Why AI?</span><h3>AI helps read; EBO gives structure.</h3><p>An LLM can propose mappings from text. The ontology supplies explicit semantic roles so the reconstruction is inspectable rather than just another generated explanation.</p></div>
+<div><span class="tag">Why machine-readable?</span><h3>Let context travel.</h3><p>A structured qualification can be queried and reused without collapsing its scope, evidence or attribution into a decontextualized label.</p></div>
+</section>
+<footer><span>EBOscope public preview · authoritative EBO OWL not yet connected.</span><span>White / black + #BCE784 · #5DD39E · #348AA7</span></footer>
+</div>
+<script>
+const input=document.getElementById("entity"),notice=document.getElementById("notice");
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{input.value=b.dataset.v;notice.classList.add("on")});
+document.getElementById("go").onclick=()=>notice.classList.add("on");
+input.addEventListener("keydown",e=>{if(e.key==="Enter")notice.classList.add("on")});
+</script>
+</body></html>
