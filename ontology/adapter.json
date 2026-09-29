@@ -1,0 +1,16 @@
+{
+  "status": "placeholder",
+  "authoritative_owl": null,
+  "version_iri": null,
+  "owl_validation_performed": false,
+  "note": "Replace this adapter when the authoritative EBO OWL is released. The public prototype currently uses provisional human-readable EBO roles, not fabricated ontology axioms.",
+  "expected_core_terms": [
+    "EpistemicBiasQualification",
+    "BiasAssessmentActivity",
+    "EpistemicCriterion",
+    "BiasIndicator",
+    "EpistemicBiasCategory",
+    "BiasAcknowledgement",
+    "BiasMitigationActivity"
+  ]
+}
