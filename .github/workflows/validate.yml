@@ -1,0 +1,28 @@
+name: Validate EBOscope
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check Python syntax
+        run: python -m py_compile app.py
+      - name: Check frontend JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html = Path("web/index.html").read_text(encoding="utf-8")
+          js = html.split("<script>", 1)[1].split("</script>", 1)[0]
+          Path("/tmp/eboscope.js").write_text(js, encoding="utf-8")
+          PY
+          node --check /tmp/eboscope.js
+      - name: Check JSON
+        run: python -m json.tool ontology/draft.json >/dev/null
