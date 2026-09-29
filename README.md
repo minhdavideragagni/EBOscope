@@ -1,38 +1,52 @@
 # EBOscope
 
-**EBOscope** goes beyond a decontextualized claim such as **“X is biased.”**
+**EBOscope** is an application based on the **Epistemic Bias Ontology (EBO)**.
 
-A visitor enters a named artefact, process, map/projection, dataset/model, document, or public work. EBOscope first searches for sources that **explicitly use or report bias language** about that target. It then reconstructs the documented reasoning behind each claim through an EBO-oriented structure.
+It turns documented bias claims into **contextualised, source-grounded EBO qualifications** by reconstructing who assessed what, according to which criterion, using what evidence, and for what purpose.
 
-> EBOscope is **not** a bias detector and does not output a global “biased / unbiased” verdict.
+> EBOscope is **not** a bias detector. It does not output a global “biased / unbiased” verdict.
 
-## Retrieval logic: bias-claim first
+## EBOscope v2
 
-The prototype deliberately starts from explicit claims rather than from generic technical limitations.
+The v2 prototype introduces:
 
-1. Search for the named target together with **“biased”**.
-2. If needed, broaden to the term **“bias”**.
-3. Keep only retrieved source text that actually contains explicit bias language.
-4. Read multiple portions of each source, especially the passages around the bias claim.
-5. Reconstruct the qualification from different parts of **that same source** where the source supports it.
+- recall-enhanced retrieval restricted to explicit **bias / biased** language;
+- support for sources available only as search-result snippets;
+- three result statuses:
+  - **EBO qualification**
+  - **Bias claim**
+  - **Bias-related context**
+- field-level grounding for target, assessor, purpose, method, criterion, indicator, evidence, grounds, qualification and category;
+- explicit **Source-explicit / EBOscope interpretation / Not documented** provenance;
+- source metadata including year, source type and retrieval level;
+- explicit source ↔ assessment correspondence;
+- an interactive EBO graph with:
+  - draft model view,
+  - qualification-instance view,
+  - combined TBox/ABox view;
+- an **EBO Passport**, a portable application-level record of one reconstructed qualification;
+- in-browser JSON-LD preview, copy and download;
+- a draft EBO conceptual model in `ontology/draft.json`.
 
-A technical limitation alone is not automatically converted into an epistemic-bias qualification.
+## Retrieval policy
 
-## What is reconstructed
+EBOscope currently searches only for explicit bias terminology. To improve coverage without broadening the semantics to unrelated criticism, it tries multiple formulations:
 
-For each documented claim, EBOscope can expose:
+- `"entity" "biased"`
+- `"entity" bias`
+- `entity biased`
+- `entity bias`
 
-- assessed **target** and its scope;
-- reported **assessor**;
-- relevant **purpose/context**;
-- epistemic **criterion**;
-- **indicator**;
-- reported **evidence**;
-- supporting **grounds**;
-- resulting **qualification**;
-- optional **bias category**.
+The system does **not** expand retrieval to terms such as *misrepresents*, *distorts*, *skewed*, or *underrepresents*.
 
-If the source merely says “biased” without enough reasoning, the result remains a **bare claim** rather than being completed by the model.
+A retrieved source can yield zero qualifications. This may happen when:
+
+- the page discusses bias but does not formulate an identifiable assessment;
+- the retrieved portion does not document enough of the assessment;
+- only a snippet is available;
+- the reconstruction cannot be grounded in verified source excerpts.
+
+A missing qualification is never treated as evidence that the target is unbiased.
 
 ## Architecture
 
@@ -40,39 +54,57 @@ If the source merely says “biased” without enough reasoning, the result rema
 - **Backend:** FastAPI in `app.py`
 - **Web retrieval:** Tavily Search API
 - **LLM reconstruction:** Groq API, default model `openai/gpt-oss-120b`
-- **Ontology:** provisional EBO application profile
+- **Draft ontology model:** `ontology/draft.json`
 - **Hosting:** Render Blueprint via `render.yaml`
 
 Visitors never enter API keys.
 
-## Deployment
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/minhdavideragagni/EBOscope)
-
-Configure these server-side secrets in Render:
+## Server-side secrets
 
 - `GROQ_API_KEY`
 - `TAVILY_API_KEY`
 
 Do **not** commit real keys to GitHub.
 
-After deployment:
+## EBO Passport
 
-- `/` — public EBOscope interface
-- `/api/health` — provider configuration status
+The **EBO Passport** is an EBOscope application artefact, **not an EBO ontology class**.
 
-## Epistemic safeguards
+It packages one reconstructed assessment with:
 
-EBOscope distinguishes:
+- EBO-oriented entities and relations;
+- source metadata;
+- reconstruction status;
+- per-field provenance;
+- Web Annotation-style text-quote grounding;
+- draft JSON-LD.
 
-- an observable/technical phenomenon from an epistemic-bias qualification;
-- the reporting source from the assessor it reports;
-- a bias category from an epistemic criterion;
-- a claim about a particular version/use/subset from a global judgement;
-- source-explicit information from an EBO-oriented interpretation.
-
-Exact source quotations are returned only when they can be matched back to the retrieved source text.
+Once the authoritative EBO OWL is available, the draft namespace can be replaced with the real EBO IRIs and the export can be validated against the final ontology.
 
 ## EBO status
 
-The authoritative EBO OWL is **not yet connected**. `ontology/adapter.json` remains an explicit placeholder. Once the ontology is released, the provisional terms and JSON-LD export can be aligned to the real EBO IRIs and axioms.
+The authoritative EBO OWL is not yet released.
+
+The v2 application therefore uses the supplied **draft conceptual model**, including:
+
+- `ebo:BiasAssessmentActivity`
+- `ebo:EpistemicBiasQualification`
+- `ebo:EpistemicCriterion`
+- `ebo:BiasIndicator`
+- `ebo:EpistemicBiasCategory`
+- `ebo:BiasAcknowledgement`
+- `ebo:BiasMitigationActivity`
+- `ebo:BiasPropagation`
+- Cognitive Perspectivisation integration;
+- Web Annotation grounding;
+- provenance, acknowledgement, impact and propagation relations.
+
+See `ontology/draft.json` for the current conceptual representation.
+
+## Validation
+
+A GitHub Actions workflow checks:
+
+- Python syntax;
+- frontend JavaScript syntax;
+- draft EBO JSON validity.

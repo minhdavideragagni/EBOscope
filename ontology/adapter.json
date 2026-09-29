@@ -1,16 +1,20 @@
 {
-  "status": "placeholder",
+  "status": "draft-conceptual-model",
   "authoritative_owl": null,
   "version_iri": null,
   "owl_validation_performed": false,
-  "note": "Replace this adapter when the authoritative EBO OWL is released. The public prototype currently uses provisional human-readable EBO roles, not fabricated ontology axioms.",
+  "conceptual_model": "ontology/draft.json",
+  "note": "EBOscope v2 implements the supplied EBO draft conceptual model. This is not the authoritative EBO OWL and does not claim final axioms or IRIs.",
   "expected_core_terms": [
-    "EpistemicBiasQualification",
     "BiasAssessmentActivity",
+    "EpistemicBiasQualification",
     "EpistemicCriterion",
     "BiasIndicator",
     "EpistemicBiasCategory",
     "BiasAcknowledgement",
-    "BiasMitigationActivity"
+    "BiasMitigationActivity",
+    "BiasPropagation",
+    "BiasPropagationAcknowledgement",
+    "BiasImpactAcknowledgement"
   ]
 }
