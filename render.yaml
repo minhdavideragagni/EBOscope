@@ -10,9 +10,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.11
-      - key: MISTRAL_MODEL
-        value: mistral-small-latest
-      - key: MISTRAL_API_KEY
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_API_KEY
         sync: false
       - key: TAVILY_API_KEY
         sync: false
