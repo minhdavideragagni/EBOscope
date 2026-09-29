@@ -1,0 +1,386 @@
+{
+  "status": "draft",
+  "title": "Epistemic Bias Ontology (EBO) — draft conceptual model",
+  "authoritative_owl": null,
+  "note": "This file represents the supplied draft conceptual model for EBOscope v2. It is not the authoritative EBO OWL and does not claim final axioms or IRIs.",
+  "description": "The Epistemic Bias Ontology (EBO) is being developed as the interface for representing epistemic bias within the INFINITY ontology network. It represents the assessment through which a limitation becomes epistemically relevant, including the entity examined, the responsible agent, the assessment method, criteria and evidence, and the resulting qualification. Bias assessments are therefore attributable, contextualised and open to revision as evidence or intended uses change.",
+  "conceptual_grounding": [
+    {
+      "label": "Bueter (2022)",
+      "role": "Epistemic account of bias; distinguishing biased from legitimately value-laden research through reasons to suspect research could have been systematically better."
+    },
+    {
+      "label": "Ferrario et al. (2025)",
+      "role": "Relational and norm-sensitive view of bias; the same outcome may be biased relative to one standard but not another."
+    },
+    {
+      "label": "Doc-BiasO — Russo & Vidal (2025)",
+      "role": "Complementary machine-readable documentation of bias in ML pipelines; EBO keeps indicators/evidence distinct from the qualification itself."
+    },
+    {
+      "label": "Gangemi & Presutti (2022)",
+      "role": "Cognitive Perspectivisation pattern reused to model conceptualiser, background, lens, attitude and cut without equating perspective with bias."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ebo:BiasAssessmentActivity",
+      "label": "BiasAssessmentActivity",
+      "kind": "class",
+      "group": "assessment",
+      "parents": [
+        "prov:Activity",
+        "dul:Event"
+      ]
+    },
+    {
+      "id": "ebo:EpistemicBiasQualification",
+      "label": "EpistemicBiasQualification",
+      "kind": "class",
+      "group": "qualification",
+      "parents": [
+        "dul:Description"
+      ]
+    },
+    {
+      "id": "dul:Entity",
+      "label": "Entity",
+      "kind": "external",
+      "group": "entity"
+    },
+    {
+      "id": "prov:Agent",
+      "label": "Agent",
+      "kind": "external",
+      "group": "agent"
+    },
+    {
+      "id": "dul:Method",
+      "label": "Method",
+      "kind": "external",
+      "group": "method"
+    },
+    {
+      "id": "prov:Entity",
+      "label": "Evidence / prov:Entity",
+      "kind": "external",
+      "group": "evidence"
+    },
+    {
+      "id": "ebo:EpistemicCriterion",
+      "label": "EpistemicCriterion",
+      "kind": "class",
+      "group": "vocabulary",
+      "parents": [
+        "skos:Concept"
+      ]
+    },
+    {
+      "id": "ebo:BiasIndicator",
+      "label": "BiasIndicator",
+      "kind": "class",
+      "group": "vocabulary",
+      "parents": [
+        "skos:Concept",
+        "indicator:Indicator"
+      ]
+    },
+    {
+      "id": "ebo:EpistemicBiasCategory",
+      "label": "EpistemicBiasCategory",
+      "kind": "class",
+      "group": "vocabulary",
+      "parents": [
+        "skos:Concept"
+      ]
+    },
+    {
+      "id": "indicator:IndicatorCalculation",
+      "label": "IndicatorCalculation",
+      "kind": "external",
+      "group": "vocabulary"
+    },
+    {
+      "id": "indicator:Metric",
+      "label": "Metric",
+      "kind": "external",
+      "group": "vocabulary"
+    },
+    {
+      "id": "pers:CognitivePerspectivisation",
+      "label": "CognitivePerspectivisation",
+      "kind": "external",
+      "group": "perspective",
+      "parents": [
+        "dul:Situation"
+      ]
+    },
+    {
+      "id": "pers:Conceptualiser",
+      "label": "Conceptualiser",
+      "kind": "external",
+      "group": "perspective"
+    },
+    {
+      "id": "pers:Background",
+      "label": "Background",
+      "kind": "external",
+      "group": "perspective"
+    },
+    {
+      "id": "pers:Lens",
+      "label": "Lens",
+      "kind": "external",
+      "group": "perspective"
+    },
+    {
+      "id": "pers:Attitude",
+      "label": "Attitude",
+      "kind": "external",
+      "group": "perspective"
+    },
+    {
+      "id": "pers:Cut",
+      "label": "Cut",
+      "kind": "external",
+      "group": "perspective"
+    },
+    {
+      "id": "ebo:BiasAcknowledgement",
+      "label": "BiasAcknowledgement",
+      "kind": "class",
+      "group": "acknowledgement",
+      "parents": [
+        "crm:E73_Information_Object"
+      ]
+    },
+    {
+      "id": "ebo:BiasMitigationActivity",
+      "label": "BiasMitigationActivity",
+      "kind": "class",
+      "group": "mitigation",
+      "parents": [
+        "prov:Activity",
+        "dul:Event"
+      ]
+    },
+    {
+      "id": "ebo:BiasPropagation",
+      "label": "BiasPropagation",
+      "kind": "class",
+      "group": "propagation",
+      "parents": [
+        "dul:Collection"
+      ]
+    },
+    {
+      "id": "ebo:BiasPropagationAcknowledgement",
+      "label": "BiasPropagationAcknowledgement",
+      "kind": "class",
+      "group": "propagation",
+      "parents": [
+        "ebo:BiasAcknowledgement"
+      ]
+    },
+    {
+      "id": "ebo:BiasImpactAcknowledgement",
+      "label": "BiasImpactAcknowledgement",
+      "kind": "class",
+      "group": "acknowledgement",
+      "parents": [
+        "ebo:BiasAcknowledgement"
+      ]
+    },
+    {
+      "id": "oa:Annotation",
+      "label": "Annotation",
+      "kind": "external",
+      "group": "annotation"
+    },
+    {
+      "id": "oa:SpecificResource",
+      "label": "SpecificResource",
+      "kind": "external",
+      "group": "annotation"
+    },
+    {
+      "id": "oa:Selector",
+      "label": "Selector",
+      "kind": "external",
+      "group": "annotation"
+    }
+  ],
+  "edges": [
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "dul:Entity",
+      "property": "ebo:assesses"
+    },
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "dul:Method",
+      "property": "ebo:followsMethod"
+    },
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "prov:Agent",
+      "property": "prov:wasAssociatedWith"
+    },
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "prov:Entity",
+      "property": "prov:used"
+    },
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "ebo:EpistemicBiasQualification",
+      "property": "ebo:formulatesQualification"
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "dul:Entity",
+      "property": "ebo:concerns"
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "ebo:EpistemicCriterion",
+      "property": "ebo:accordingToCriterion"
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "ebo:EpistemicBiasCategory",
+      "property": "ebo:hasBiasCategory"
+    },
+    {
+      "source": "ebo:EpistemicBiasQualification",
+      "target": "dul:Entity",
+      "property": "ebo:hasBiasSource",
+      "note": "Origin/source of the limitation, not the reporting document."
+    },
+    {
+      "source": "ebo:EpistemicCriterion",
+      "target": "ebo:BiasIndicator",
+      "property": "ebo:hasIndicator"
+    },
+    {
+      "source": "indicator:IndicatorCalculation",
+      "target": "ebo:BiasIndicator",
+      "property": "indicator:forIndicator"
+    },
+    {
+      "source": "indicator:IndicatorCalculation",
+      "target": "indicator:Metric",
+      "property": "indicator:basedOnMetric"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "ebo:BiasAssessmentActivity",
+      "property": "dul:includesEvent"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "pers:Conceptualiser",
+      "property": "pers:byConceptualiser"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "pers:Background",
+      "property": "pers:fromBackground"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "pers:Lens",
+      "property": "pers:usingLens"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "pers:Attitude",
+      "property": "pers:withAttitude"
+    },
+    {
+      "source": "pers:CognitivePerspectivisation",
+      "target": "pers:Cut",
+      "property": "pers:featuringCut"
+    },
+    {
+      "source": "ebo:BiasAcknowledgement",
+      "target": "ebo:EpistemicBiasQualification",
+      "property": "ebo:refersToQualification"
+    },
+    {
+      "source": "ebo:BiasAcknowledgement",
+      "target": "prov:Agent",
+      "property": "prov:wasAttributedTo"
+    },
+    {
+      "source": "ebo:BiasAssessmentActivity",
+      "target": "ebo:BiasAcknowledgement",
+      "property": "ebo:producesAcknowledgement"
+    },
+    {
+      "source": "ebo:BiasMitigationActivity",
+      "target": "ebo:EpistemicBiasQualification",
+      "property": "ebo:addressesQualification"
+    },
+    {
+      "source": "ebo:BiasMitigationActivity",
+      "target": "prov:Agent",
+      "property": "prov:wasAssociatedWith"
+    },
+    {
+      "source": "ebo:BiasMitigationActivity",
+      "target": "dul:Method",
+      "property": "ebo:followsMethod"
+    },
+    {
+      "source": "ebo:BiasPropagationAcknowledgement",
+      "target": "ebo:BiasPropagation",
+      "property": "ebo:refersToPropagation"
+    },
+    {
+      "source": "ebo:BiasImpactAcknowledgement",
+      "target": "dul:Entity",
+      "property": "ebo:affects"
+    },
+    {
+      "source": "oa:Annotation",
+      "target": "ebo:BiasAcknowledgement",
+      "property": "oa:hasBody"
+    },
+    {
+      "source": "oa:Annotation",
+      "target": "oa:SpecificResource",
+      "property": "oa:hasTarget"
+    },
+    {
+      "source": "oa:SpecificResource",
+      "target": "dul:Entity",
+      "property": "oa:hasSource"
+    },
+    {
+      "source": "oa:SpecificResource",
+      "target": "oa:Selector",
+      "property": "oa:hasSelector"
+    }
+  ],
+  "examples": [
+    {
+      "id": "mercator",
+      "title": "Mercator and comparison of territorial areas",
+      "summary": "A geography educator assesses a classroom Mercator map for comparing territorial areas. The criterion is representational adequacy for this purpose, the indicator is area distortion, and the qualification concerns this map in this use.",
+      "qualification": "This classroom map is unsuitable for comparing the relative areas of territories."
+    },
+    {
+      "id": "debias",
+      "title": "DE-BIAS and contextual terminology",
+      "summary": "A cataloguer reviews a current catalogue description presenting a community as 'primitive'. The assessment concerns an unsupported cultural hierarchy and keeps a current catalogue use distinct from a historical quotation.",
+      "qualification": "This description presents an unsupported cultural hierarchy as a factual classification."
+    },
+    {
+      "id": "rupe-magna",
+      "title": "Rupe Magna and scope of generalisation",
+      "summary": "An archaeologist reviews whether an RTI sample selected for technical quality supports claims about the full iconographic diversity of a rock surface. The qualification records that representativeness has not been established.",
+      "qualification": "Representativeness for the full iconographic diversity of Rupe Magna has not been established; surface-wide generalisations require further evidence."
+    }
+  ]
+}
