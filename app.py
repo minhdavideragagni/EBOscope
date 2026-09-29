@@ -5,7 +5,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 app = FastAPI(title="EBOscope")
 app.mount("/static", StaticFiles(directory="web"), name="static")
@@ -18,23 +18,25 @@ class ExploreRequest(BaseModel):
     entity: str = Field(min_length=2, max_length=180)
 
 class Candidate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     source_id: int
     status: str
-    title: str = ""
-    target: str = ""
-    assessor: str = ""
-    purpose: str = ""
-    criterion: str = ""
-    indicator: str = ""
-    evidence: str = ""
-    grounds: str = ""
-    qualification: str = ""
-    category: str = ""
-    exact_quote: str = ""
-    note: str = ""
+    title: str
+    target: str
+    assessor: str
+    purpose: str
+    criterion: str
+    indicator: str
+    evidence: str
+    grounds: str
+    qualification: str
+    category: str
+    exact_quote: str
+    note: str
 
 class Extraction(BaseModel):
-    candidates: list[Candidate] = Field(default_factory=list, max_length=5)
+    model_config = ConfigDict(extra="forbid")
+    candidates: list[Candidate] = Field(max_length=5)
 
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
