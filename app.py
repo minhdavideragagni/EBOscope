@@ -41,18 +41,25 @@ class Extraction(BaseModel):
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
-def post_json(url: str, headers: dict, payload: dict, timeout: int = 100):
+def post_json(url: str, headers: dict, payload: dict, timeout: int = 100, provider: str = "Provider"):
     try:
         r = httpx.post(url, headers=headers, json=payload, timeout=timeout)
     except httpx.HTTPError as e:
         raise HTTPException(502, f"Provider connection failed: {e}")
     if r.status_code >= 400:
+        retry_after = r.headers.get("retry-after", "")
         if r.status_code == 429:
-            detail = "Provider free-tier rate/quota limit reached. Try again later."
+            detail = f"{provider} free-tier rate/quota limit reached."
+            if retry_after:
+                detail += f" Retry in about {retry_after} seconds."
+            else:
+                detail += " Try again shortly."
         elif r.status_code in (401, 403):
-            detail = "Provider authentication failed. Check the server-side API key."
+            detail = f"{provider} authentication failed. Check the server-side API key."
+        elif r.status_code == 413:
+            detail = f"{provider} rejected an oversized request."
         else:
-            detail = f"Provider returned HTTP {r.status_code}."
+            detail = f"{provider} returned HTTP {r.status_code}."
         raise HTTPException(502, detail)
     try:
         return r.json()
@@ -66,7 +73,7 @@ def normalize_text(text: str) -> str:
 def has_explicit_bias_language(text: str) -> bool:
     return bool(re.search(r"\bbias(?:ed|es|ing)?\b", text, flags=re.I))
 
-def source_excerpt(text: str, max_chars: int = 6500) -> str:
+def source_excerpt(text: str, max_chars: int = 2600) -> str:
     """Sample multiple parts of one source while centering explicit bias-claim passages."""
     text = normalize_text(text)
     if len(text) <= max_chars:
@@ -108,6 +115,7 @@ def tavily_search(query: str, max_results: int = 6):
             "include_answer": False,
             "include_raw_content": "text",
         },
+        provider="Tavily",
     )
     return data.get("results", []) if isinstance(data, dict) else []
 
@@ -182,7 +190,9 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         raise HTTPException(503, "GROQ_API_KEY is not configured.")
 
     packed = []
-    for s in sources[:5]:
+    # Keep the total Groq prompt comfortably below the Free-plan TPM ceiling.
+    # Three focused source excerpts are preferable to five oversized pages.
+    for s in sources[:3]:
         packed.append(
             f"=== SOURCE {s['id']} ===\n"
             f"TITLE: {s['title']}\nURL: {s['url']}\n"
@@ -200,6 +210,7 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         "model": GROQ_MODEL,
         "temperature": 0,
         "reasoning_effort": "low",
+        "max_completion_tokens": 2200,
         "messages": [
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": prompt},
@@ -218,6 +229,7 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         "https://api.groq.com/openai/v1/chat/completions",
         {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
         payload,
+        provider="Groq",
     )
 
     try:
