@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EBOscope — See what is behind a bias claim</title>
+<meta name="description" content="Explore source-documented epistemic bias qualifications with EBO.">
+<style>
+:root{--ink:#0b0d0c;--paper:#fbfcf8;--lime:#BCE784;--mint:#5DD39E;--blue:#348AA7;--line:#dce1d9;--muted:#68706b}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input{font:inherit}a{color:inherit}.shell{max-width:1180px;margin:auto;padding:22px 28px 60px}
+nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ink);padding-bottom:16px}.brand{font-weight:900;letter-spacing:-.04em;font-size:21px}.brand span{background:var(--lime);padding:3px 7px;border-radius:8px}.navnote{font-size:12px;color:var(--muted)}
+.hero{padding:64px 0 40px;display:grid;grid-template-columns:1.2fr .8fr;gap:42px;align-items:end}.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}.hero h1{font-size:clamp(48px,7vw,94px);letter-spacing:-.07em;line-height:.89;margin:12px 0 24px;max-width:850px}.hero p{font-size:20px;line-height:1.45;max-width:680px;margin:0}.hero-side{font-size:14px;line-height:1.55;border-left:1px solid var(--ink);padding-left:24px}
+.searchbox{border:1.5px solid var(--ink);border-radius:24px;padding:18px;background:white;box-shadow:7px 7px 0 var(--ink)}.searchrow{display:flex;gap:10px}.searchrow input{flex:1;border:0;outline:0;font-size:21px;padding:16px;background:transparent;min-width:0}.go{border:0;background:var(--ink);color:white;border-radius:16px;padding:0 24px;font-weight:800;cursor:pointer}.go:hover{background:var(--blue)}.examples{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:13px;font-size:12px;color:var(--muted)}.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 11px;cursor:pointer}.chip:hover{border-color:var(--ink)}
+.status{display:none;margin:26px 0;border-radius:18px;padding:16px 18px;background:#fff;border:1px solid var(--line)}.status.on{display:block}.pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mint);margin-right:8px;animation:p 1s infinite alternate}@keyframes p{to{opacity:.25}}
+.results{display:none;margin-top:52px}.results.on{display:block}.resulthead{display:flex;justify-content:space-between;gap:20px;align-items:end;border-bottom:1px solid var(--ink);padding-bottom:18px}.resulthead h2{font-size:36px;letter-spacing:-.04em;margin:0}.small{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:280px 1fr;gap:28px;margin-top:28px}.sources h3,.main h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;margin:0 0 12px}.source{padding:13px 0;border-top:1px solid var(--line)}.source:first-of-type{border-top:1px solid var(--ink)}.source a{font-weight:760;text-decoration:none;line-height:1.25}.source a:hover{text-decoration:underline}.source .n{font-size:11px;color:var(--muted);margin-top:5px}
+.empty{padding:42px;border:1px dashed var(--line);border-radius:22px;text-align:center;color:var(--muted)}
+.card{background:white;border:1px solid var(--ink);border-radius:22px;margin-bottom:22px;overflow:hidden}.cardtop{display:flex;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}.statuspill{border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.07em}.qualification{background:var(--lime)}.bare_claim{background:#eee}.technical_context{background:#e9f4f7}.card h4{font-size:26px;letter-spacing:-.035em;margin:0}.quote{padding:20px;font-family:Georgia,serif;font-size:20px;line-height:1.45;background:#f4f7f0;border-bottom:1px solid var(--line)}.map{display:grid;grid-template-columns:repeat(3,1fr);gap:0}.node{padding:18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:105px}.node:nth-child(3n){border-right:0}.label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.11em;color:var(--blue);margin-bottom:8px}.value{font-size:14px;line-height:1.35}.qual{background:var(--ink);color:white}.qual .label{color:var(--lime)}.category{background:var(--mint)}.note{padding:13px 20px;font-size:12px;color:var(--muted)}
+.about{margin-top:72px;border-top:1px solid var(--ink);padding-top:30px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}.about h3{font-size:24px;letter-spacing:-.03em;margin:0 0 8px}.about p{font-size:14px;line-height:1.55;margin:0}.tag{display:inline-block;background:var(--blue);color:white;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+footer{margin-top:55px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:20px}
+@media(max-width:760px){.shell{padding:18px}.hero{grid-template-columns:1fr;padding-top:40px}.hero-side{border-left:0;border-top:1px solid var(--ink);padding:16px 0 0}.searchrow{display:block}.go{width:100%;padding:15px;margin-top:8px}.grid{grid-template-columns:1fr}.map{grid-template-columns:1fr}.node{border-right:0}.about{grid-template-columns:1fr}.navnote{display:none}}
+</style>
+</head>
+<body><div class="shell">
+<nav><div class="brand">EBO<span>scope</span></div><div class="navnote">Epistemic Bias Ontology explorer · public prototype</div></nav>
+<section class="hero">
+<div><div class="eyebrow">Go beyond “it is biased”</div><h1>See what is behind a bias claim.</h1>
+<p>Enter a named artefact, process, dataset, map, model, or public work. EBOscope searches the web for documented assessments and makes their <b>scope, criteria, evidence and qualifications</b> explicit.</p></div>
+<div class="hero-side"><b>No bias score. No global verdict.</b><br>EBOscope reconstructs what sources actually argue, then maps that reasoning to a provisional EBO profile. A missing result is not evidence of “no bias”.</div>
+</section>
+<div class="searchbox">
+<div class="searchrow"><input id="entity" aria-label="Entity" placeholder="e.g. Mercator projection"><button class="go" id="go">Explore qualifications →</button></div>
+<div class="examples">Try a real search: <button class="chip" data-v="Mercator projection">Mercator projection</button><button class="chip" data-v="ImageNet person subtree">ImageNet person subtree</button></div>
+</div>
+<div class="status" id="status"><span class="pulse"></span><span id="statusText">Searching and reconstructing documented assessments…</span></div>
+<section class="results" id="results">
+<div class="resulthead"><div><div class="eyebrow">Results for</div><h2 id="rEntity"></h2></div><div class="small" id="meta"></div></div>
+<div class="grid"><aside class="sources"><h3>Sources read</h3><div id="sourceList"></div></aside><main class="main"><h3>Source-grounded reconstructions</h3><div id="cards"></div></main></div>
+</section>
+<section class="about">
+<div><span class="tag">1 · Search</span><h3>Find documented claims.</h3><p>The system searches for criticism, limitations and assessment evidence around the named target. It reads retrievable page text, not search snippets alone.</p></div>
+<div><span class="tag">2 · Reconstruct</span><h3>Map the reasoning.</h3><p>Mistral proposes target, assessor, purpose, criterion, indicator, evidence, grounds and qualification. Exact quotations are accepted only when they can be verified in the retrieved source text.</p></div>
+<div><span class="tag">3 · EBO</span><h3>Keep the judgement scoped.</h3><p>The ontology separates an assessment from its resulting qualification. Bias categories classify a qualification; they do not replace its criterion or evidence.</p></div>
+</section>
+<footer><span>EBOscope does not certify that a source is correct. It exposes how a documented bias claim is scoped and supported.</span><span id="model"></span></footer>
+</div>
+<script>
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{$("#entity").value=b.dataset.v; explore()});
+$("#go").onclick=explore; $("#entity").addEventListener("keydown",e=>{if(e.key==="Enter")explore()});
+function field(label,value,cls=""){if(!value)return "";return '<div class="node '+cls+'"><div class="label">'+esc(label)+'</div><div class="value">'+esc(value)+'</div></div>'}
+async function explore(){
+ const entity=$("#entity").value.trim(); if(!entity)return;
+ $("#status").classList.add("on");$("#statusText").textContent="Searching the web, reading sources and reconstructing documented assessments…";$("#results").classList.remove("on");
+ try{
+  const r=await fetch("/api/explore",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({entity})});
+  const d=await r.json(); if(!r.ok)throw new Error(d.detail||"Request failed.");
+  $("#rEntity").textContent=d.entity; $("#results").classList.add("on");
+  $("#sourceList").innerHTML=d.sources.length?d.sources.map(s=>'<div class="source"><a target="_blank" rel="noopener" href="'+esc(s.url)+'">'+esc(s.title)+'</a><div class="n">Source '+s.id+(s.published_date?" · "+esc(s.published_date):"")+'</div></div>').join(""):'<div class="empty">No readable sources were retrieved.</div>';
+  $("#meta").textContent=d.candidates.length+" reconstruction candidate"+(d.candidates.length===1?"":"s");
+  $("#model").textContent=d.model?"Analysis: "+d.model:"";
+  $("#cards").innerHTML=d.candidates.length?d.candidates.map((c,i)=>'<article class="card"><div class="cardtop"><div><div class="eyebrow">Candidate '+(i+1)+' · Source '+c.source_id+'</div><h4>'+esc(c.qualification||c.target||"Documented position")+'</h4></div><span class="statuspill '+esc(c.status)+'">'+esc(c.status.replace("_"," "))+'</span></div><div class="quote">“'+esc(c.exact_quote)+'”</div><div class="map">'+field("Target",c.target)+field("Assessor",c.assessor)+field("Purpose / use",c.purpose)+field("Epistemic criterion",c.criterion)+field("Bias indicator",c.indicator)+field("Evidence",c.evidence)+field("Grounds",c.grounds)+field("Qualification",c.qualification,"qual")+field("Bias category",c.bias_category,"category")+'</div><div class="note"><b>Source:</b> <a target="_blank" rel="noopener" href="'+esc(c.source_url)+'">'+esc(c.source_title)+'</a>'+(c.note?' · '+esc(c.note):'')+'</div></article>').join(""):'<div class="empty">No source-grounded epistemic-bias qualification was reconstructed from the retrieved text. This is not a “bias-free” verdict.</div>';
+ }catch(e){$("#statusText").textContent=e.message;return}
+ $("#status").classList.remove("on");
+}
+</script></body></html>
