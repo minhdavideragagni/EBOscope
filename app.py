@@ -13,8 +13,8 @@ from pydantic import BaseModel, ConfigDict, Field
 app = FastAPI(title="EBOscope", version="2.0")
 app.mount("/static", StaticFiles(directory="web"), name="static")
 
-GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
-GROQ_KEY = os.getenv("GROQ_API_KEY", "").strip()
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+OPENAI_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 TAVILY_KEY = os.getenv("TAVILY_API_KEY", "").strip()
 
 # Lightweight in-memory caches for development/testing on Render.
@@ -70,8 +70,18 @@ def post_json(url: str, headers: dict, payload: dict, timeout: int = 100, provid
     if r.status_code >= 400:
         retry_after = r.headers.get("retry-after", "")
         if r.status_code == 429:
-            detail = f"{provider} free-tier rate/quota limit reached."
-            detail += f" Retry in about {retry_after} seconds." if retry_after else " Try again shortly."
+            code = ""
+            try:
+                code = str((r.json().get("error") or {}).get("code") or "")
+            except Exception:
+                pass
+            if code == "credit_balance_exhausted":
+                detail = f"{provider} API credit balance is exhausted."
+            elif code in {"organization_spend_limit_exceeded", "project_spend_limit_exceeded", "organization_usage_limit_exceeded"}:
+                detail = f"{provider} API spending/usage limit has been reached."
+            else:
+                detail = f"{provider} API rate limit reached."
+                detail += f" Retry in about {retry_after} seconds." if retry_after else " Try again shortly."
         elif r.status_code in (401, 403):
             detail = f"{provider} authentication failed. Check the server-side API key."
         elif r.status_code == 413:
@@ -309,12 +319,11 @@ def verify_grounding(field: GroundedField, source_text: str):
     }
 
 def analyze(entity: str, sources: list[dict[str, Any]]):
-    if not GROQ_KEY:
-        raise HTTPException(503, "GROQ_API_KEY is not configured.")
+    if not OPENAI_KEY:
+        raise HTTPException(503, "OPENAI_API_KEY is not configured.")
 
     packed = []
-    # Three compact source excerpts keep the current prototype within the
-    # Groq free-tier token-per-minute budget more reliably.
+    # Three compact source excerpts keep reconstruction focused and inexpensive.
     for s in sources[:3]:
         packed.append(
             f"=== SOURCE {s['id']} ===\n"
@@ -327,8 +336,7 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
 
     prompt = f"SEARCHED ENTITY (retrieval hint only): {entity}\n\n" + "\n\n".join(packed)
     payload = {
-        "model": GROQ_MODEL,
-        "temperature": 0,
+        "model": OPENAI_MODEL,
         "reasoning_effort": "low",
         "max_completion_tokens": 1800,
         "messages": [
@@ -346,16 +354,16 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
     }
 
     data = post_json(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+        "https://api.openai.com/v1/chat/completions",
+        {"Authorization": f"Bearer {OPENAI_KEY}", "Content-Type": "application/json"},
         payload,
-        provider="Groq",
+        provider="OpenAI",
     )
 
     try:
         parsed = Extraction.model_validate(json.loads(data["choices"][0]["message"]["content"]))
     except Exception as e:
-        raise HTTPException(502, "Groq did not return a valid EBOscope reconstruction.") from e
+        raise HTTPException(502, "OpenAI did not return a valid EBOscope reconstruction.") from e
 
     source_by_id = {s["id"]: s for s in sources}
     verified = []
@@ -395,9 +403,9 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         })
 
     model = {
-        "provider": "Groq",
-        "name": data.get("model") or GROQ_MODEL,
-        "requested_model": GROQ_MODEL,
+        "provider": "OpenAI",
+        "name": data.get("model") or OPENAI_MODEL,
+        "requested_model": OPENAI_MODEL,
     }
     raw_usage = data.get("usage") or {}
     usage = {
@@ -441,8 +449,8 @@ def health():
     return {
         "ok": True,
         "version": "2.0",
-        "model": {"provider": "Groq", "name": GROQ_MODEL},
-        "configured": {"groq": bool(GROQ_KEY), "tavily": bool(TAVILY_KEY)},
+        "model": {"provider": "OpenAI", "name": OPENAI_MODEL},
+        "configured": {"openai": bool(OPENAI_KEY), "tavily": bool(TAVILY_KEY)},
         "retrieval_mode": "bias-language-only, recall-enhanced",
         "ebo_owl": "draft-conceptual-model",
     }
@@ -479,7 +487,7 @@ def explore(req: ExploreRequest):
             "sources": [],
             "candidates": [],
             "diagnostics": diagnostics([], [], cache_hit=False),
-            "model": {"provider": "Groq", "name": GROQ_MODEL},
+            "model": {"provider": "OpenAI", "name": OPENAI_MODEL},
             "message": "No readable source containing explicit bias/bias(ed) language was retrieved. This is a retrieval result, not evidence that the entity is bias-free.",
         }
         cache_set(RESULT_CACHE, result_key, result)
