@@ -1,4 +1,4 @@
-import os, json, re, uuid
+import os, json, re, uuid, time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
@@ -17,6 +17,12 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 GROQ_KEY = os.getenv("GROQ_API_KEY", "").strip()
 TAVILY_KEY = os.getenv("TAVILY_API_KEY", "").strip()
 
+# Lightweight in-memory caches for development/testing on Render.
+# They reset when the service restarts, which is fine for the current prototype.
+CACHE_TTL_SECONDS = int(os.getenv("CACHE_TTL_SECONDS", "21600"))  # 6 hours
+SEARCH_CACHE: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+RESULT_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+
 class ExploreRequest(BaseModel):
     entity: str = Field(min_length=2, max_length=180)
 
@@ -24,7 +30,7 @@ class GroundedField(BaseModel):
     model_config = ConfigDict(extra="forbid")
     value: str
     provenance: Literal["source_explicit", "eboscope_interpretation", "not_documented"]
-    quotes: list[str] = Field(max_length=2)
+    quotes: list[str] = Field(max_length=1)
 
 class Candidate(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -46,7 +52,7 @@ class Candidate(BaseModel):
 
 class Extraction(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    candidates: list[Candidate] = Field(max_length=6)
+    candidates: list[Candidate] = Field(max_length=4)
 
 FIELD_NAMES = [
     "target", "assessor", "purpose", "method", "criterion",
@@ -85,7 +91,7 @@ def normalize_text(text: str) -> str:
 def has_bias_language(text: str) -> bool:
     return bool(re.search(r"\bbias(?:ed|es|ing)?\b", text, flags=re.I))
 
-def source_excerpt(text: str, max_chars: int = 2800) -> str:
+def source_excerpt(text: str, max_chars: int = 1900) -> str:
     """Compact multi-location sample, centered on explicit bias language."""
     text = normalize_text(text)
     if len(text) <= max_chars:
@@ -152,6 +158,19 @@ def extract_year(published_date: str, title: str) -> str:
             return m.group(0)
     return "n.d."
 
+def cache_get(cache: dict, key: str):
+    item = cache.get(key)
+    if not item:
+        return None
+    created, value = item
+    if time.time() - created > CACHE_TTL_SECONDS:
+        cache.pop(key, None)
+        return None
+    return value
+
+def cache_set(cache: dict, key: str, value):
+    cache[key] = (time.time(), value)
+
 def tavily_search(query: str, max_results: int = 8):
     return post_json(
         "https://api.tavily.com/search",
@@ -170,6 +189,11 @@ def tavily_search(query: str, max_results: int = 8):
 def search_sources(entity: str):
     if not TAVILY_KEY:
         raise HTTPException(503, "TAVILY_API_KEY is not configured.")
+
+    cache_key = "search:" + entity.casefold()
+    cached = cache_get(SEARCH_CACHE, cache_key)
+    if cached is not None:
+        return cached
 
     # V2 keeps the lexical scope intentionally narrow (bias / biased only),
     # but improves recall through quoted + unquoted formulations.
@@ -219,6 +243,7 @@ def search_sources(entity: str):
                 break
         if len(rows) >= 5:
             break
+    cache_set(SEARCH_CACHE, cache_key, rows)
     return rows
 
 SYSTEM = """You reconstruct SOURCE-DOCUMENTED epistemic-bias assessments for EBOscope.
@@ -263,7 +288,7 @@ RULES
 - Do not infer private traits, motives, competence, political preferences, health, or global character judgements about people.
 - Missing information stays missing.
 - Do not duplicate syndicated/reporting copies as independent assessments.
-- Return at most six candidates total.
+- Return at most four candidates total.
 """
 
 def verify_grounding(field: GroundedField, source_text: str):
@@ -271,7 +296,7 @@ def verify_grounding(field: GroundedField, source_text: str):
     if not value:
         return {"value": "", "provenance": "not_documented", "quotes": [], "verified": True}
     verified_quotes = []
-    for q in field.quotes[:2]:
+    for q in field.quotes[:1]:
         q = q.strip()
         if q and q in source_text:
             verified_quotes.append(q)
@@ -288,7 +313,8 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         raise HTTPException(503, "GROQ_API_KEY is not configured.")
 
     packed = []
-    # Three focused sources keep the request within the Groq free-tier TPM budget.
+    # Three compact source excerpts keep the current prototype within the
+    # Groq free-tier token-per-minute budget more reliably.
     for s in sources[:3]:
         packed.append(
             f"=== SOURCE {s['id']} ===\n"
@@ -304,7 +330,7 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         "model": GROQ_MODEL,
         "temperature": 0,
         "reasoning_effort": "low",
-        "max_completion_tokens": 2600,
+        "max_completion_tokens": 1800,
         "messages": [
             {"role": "system", "content": SYSTEM},
             {"role": "user", "content": prompt},
@@ -333,7 +359,7 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
 
     source_by_id = {s["id"]: s for s in sources}
     verified = []
-    for c in parsed.candidates[:6]:
+    for c in parsed.candidates[:4]:
         src = source_by_id.get(c.source_id)
         if not src:
             continue
@@ -373,9 +399,15 @@ def analyze(entity: str, sources: list[dict[str, Any]]):
         "name": data.get("model") or GROQ_MODEL,
         "requested_model": GROQ_MODEL,
     }
-    return verified, model, data.get("id", "")
+    raw_usage = data.get("usage") or {}
+    usage = {
+        "prompt_tokens": raw_usage.get("prompt_tokens"),
+        "completion_tokens": raw_usage.get("completion_tokens"),
+        "total_tokens": raw_usage.get("total_tokens"),
+    }
+    return verified, model, data.get("id", ""), usage
 
-def diagnostics(sources, candidates):
+def diagnostics(sources, candidates, usage=None, cache_hit=False):
     counts = {
         "qualification": sum(c["status"] == "qualification" for c in candidates),
         "bare_claim": sum(c["status"] == "bare_claim" for c in candidates),
@@ -396,6 +428,8 @@ def diagnostics(sources, candidates):
         "candidate_count": len(candidates),
         "status_counts": counts,
         "notes": notes,
+        "llm_usage": usage or {},
+        "cache_hit": cache_hit,
     }
 
 @app.get("/")
@@ -430,18 +464,28 @@ def explore(req: ExploreRequest):
             "Please enter a more identifiable target, such as a named artefact, process, model, collection, organisation, method, public work, or domain concept.",
         )
 
+    result_key = "result:" + entity.casefold()
+    cached_result = cache_get(RESULT_CACHE, result_key)
+    if cached_result is not None:
+        result = dict(cached_result)
+        result["diagnostics"] = dict(result.get("diagnostics") or {})
+        result["diagnostics"]["cache_hit"] = True
+        return result
+
     sources = search_sources(entity)
     if not sources:
-        return {
+        result = {
             "entity": entity,
             "sources": [],
             "candidates": [],
-            "diagnostics": diagnostics([], []),
+            "diagnostics": diagnostics([], [], cache_hit=False),
             "model": {"provider": "Groq", "name": GROQ_MODEL},
             "message": "No readable source containing explicit bias/bias(ed) language was retrieved. This is a retrieval result, not evidence that the entity is bias-free.",
         }
+        cache_set(RESULT_CACHE, result_key, result)
+        return result
 
-    candidates, model, response_id = analyze(entity, sources)
+    candidates, model, response_id, usage = analyze(entity, sources)
 
     # Make the source ↔ qualification relation explicit in both directions.
     ids_by_source = {}
@@ -457,11 +501,11 @@ def explore(req: ExploreRequest):
             "analyzed": s["id"] <= 3,
         })
 
-    return {
+    result = {
         "entity": entity,
         "sources": public_sources,
         "candidates": candidates,
-        "diagnostics": diagnostics(sources, candidates),
+        "diagnostics": diagnostics(sources, candidates, usage=usage, cache_hit=False),
         "model": model,
         "response_id": response_id,
         "retrieval_mode": "bias-language-only, recall-enhanced",
@@ -471,3 +515,5 @@ def explore(req: ExploreRequest):
         },
         "disclaimer": "These are source-grounded reconstructions of documented bias assessments, not a global verdict on the searched entity.",
     }
+    cache_set(RESULT_CACHE, result_key, result)
+    return result
