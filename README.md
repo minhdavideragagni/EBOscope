@@ -53,7 +53,7 @@ A missing qualification is never treated as evidence that the target is unbiased
 - **Frontend:** HTML/CSS/JavaScript in `web/index.html`
 - **Backend:** FastAPI in `app.py`
 - **Web retrieval:** Tavily Search API
-- **LLM reconstruction:** Groq API, default model `openai/gpt-oss-120b`
+- **LLM reconstruction:** OpenAI API, default model `gpt-5.6-luna`
 - **Draft ontology model:** `ontology/draft.json`
 - **Hosting:** Render Blueprint via `render.yaml`
 
@@ -61,7 +61,7 @@ Visitors never enter API keys.
 
 ## Server-side secrets
 
-- `GROQ_API_KEY`
+- `OPENAI_API_KEY`
 - `TAVILY_API_KEY`
 
 Do **not** commit real keys to GitHub.

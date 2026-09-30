@@ -10,9 +10,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.11
-      - key: GROQ_MODEL
-        value: openai/gpt-oss-120b
-      - key: GROQ_API_KEY
+      - key: OPENAI_MODEL
+        value: gpt-5.6-luna
+      - key: OPENAI_API_KEY
         sync: false
       - key: TAVILY_API_KEY
         sync: false
